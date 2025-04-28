@@ -1,0 +1,209 @@
+// schema.prisma
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Enums para mejorar la integridad de datos ---
+enum EstadoEmpleado {
+    ACTIVO
+    INACTIVO
+    TERMINADO
+}
+
+enum EstadoOrdenCompra {
+    PENDIENTE
+    PROCESANDO_PAGO
+    PAGADA
+    ENVIADA
+    RECIBIDA_PARCIAL
+    RECIBIDA_COMPLETA
+    CANCELADA
+}
+
+enum EstadoFactura {
+    PENDIENTE
+    PAGADA
+    VENCIDA
+    ANULADA
+}
+
+enum MetodoPago {
+    EFECTIVO
+    TARJETA_CREDITO
+    TARJETA_DEBITO
+    TRANSFERENCIA
+    CHEQUE
+    OTRO
+    STRIPE // Añadimos Stripe como método de pago
+}
+
+enum EstadoEnvio {
+    PREPARANDO
+    LISTO_PARA_ENVIAR
+    EN_RUTA
+    ENTREGADO
+    FALLIDO
+    DEVUELTO
+}
+
+enum TipoDocumentoCliente {
+    DUI
+    NIT
+    PASAPORTE
+    CARNET_RESIDENTE
+    OTRO
+}
+
+// --- Modelos de Negocio ---
+
+model Cliente {
+    cliente_id       Int                  @id @default(autoincrement())
+    nombre           String               @db.VarChar(50)
+    apellido         String               @db.VarChar(50)
+    telefono         String               @db.VarChar(20)
+    email            String               @unique @db.VarChar(100)
+    tipo_documento   TipoDocumentoCliente
+    numero_documento String               @unique @db.VarChar(20)
+    fecha_registro   DateTime             @default(now())
+    stripeCustomerId String?              @db.VarChar(255) // ID del cliente en Stripe (opcional)
+    AuthToken        AuthToken[]          @relation("ClienteTokens")
+    FacturaPago      FacturaPago[]
+
+    direccion_id Int?
+    Direccion    Direccion? @relation("ClienteDireccion", fields: [direccion_id], references: [id_direccion])
+}
+
+model Empleado {
+    empleado_id        Int            @id @default(autoincrement())
+    nombre             String         @db.VarChar(50)
+    apellido           String         @db.VarChar(50)
+    telefono           String         @db.VarChar(20)
+    email              String         @unique @db.VarChar(100)
+    fecha_contratacion DateTime       @default(now())
+    estado             EstadoEmpleado
+    isAdmin            Boolean        @default(false)
+
+    direccion_id Int?
+    Direccion    Direccion? @relation("EmpleadoDireccion", fields: [direccion_id], references: [id_direccion])
+
+    AuthTokens AuthToken[] @relation("EmpleadoTokens")
+}
+
+model Material {
+    material_id   Int     @id @default(autoincrement())
+    nombre        String  @db.VarChar(50)
+    descripcion   String  @db.Text
+    tipo          String  @db.VarChar(30)
+    unidad_medida String  @db.VarChar(10)
+    stock_actual  Decimal @db.Decimal(10, 2)
+    stock_minimo  Decimal @db.Decimal(10, 2)
+
+    proveedor_principal_id Int?
+    ProveedorPrincipal     Proveedor? @relation("ProveedorPrincipal", fields: [proveedor_principal_id], references: [proveedor_id])
+
+    DetalleOrden DetalleOrden[]
+}
+
+model Proveedor {
+    proveedor_id          Int     @id @default(autoincrement())
+    nombre                String  @db.VarChar(50)
+    telefono              String  @db.VarChar(20)
+    email                 String  @unique @db.VarChar(100)
+    productos_principales String? @db.Text
+
+    direccion_id Int?       @unique
+    Direccion    Direccion? @relation("ProveedorDireccion", fields: [direccion_id], references: [id_direccion])
+
+    MaterialesPrincipales Material[]    @relation("ProveedorPrincipal")
+    OrdenesCompra         OrdenCompra[]
+}
+
+model OrdenCompra {
+    orden_compra_id Int               @id @default(autoincrement())
+    proveedor_id    Int
+    fecha_orden     DateTime          @default(now())
+    fecha_esperada  DateTime
+    estado          EstadoOrdenCompra
+
+    Proveedor     Proveedor           @relation(fields: [proveedor_id], references: [proveedor_id])
+    DetallesOrden DetalleOrden[]
+    Envios        Envio[]
+}
+
+model DetalleOrden {
+    detalle_id      Int     @id @default(autoincrement())
+    orden_compra_id Int
+    material_id     Int
+    cantidad        Decimal @db.Decimal(10, 2)
+    precio_unitario Decimal @db.Decimal(10, 2)
+
+    OrdenCompra OrdenCompra @relation(fields: [orden_compra_id], references: [orden_compra_id])
+    Material    Material    @relation(fields: [material_id], references: [material_id])
+
+    Facturas FacturaPago[] // Relación M-N implícita
+}
+
+model FacturaPago {
+    factura_id            Int           @id @default(autoincrement())
+    cliente_id            Int
+    fecha_emision         DateTime      @default(now())
+    fecha_vencimiento     DateTime
+    total                 Decimal       @db.Decimal(12, 2)
+    estado                EstadoFactura
+    metodo_pago           MetodoPago
+    stripePaymentIntentId String?       @unique @db.VarChar(255) // ID del PaymentIntent de Stripe (opcional)
+    stripeChargeId        String?       @unique @db.VarChar(255) // ID del Charge de Stripe (opcional)
+
+    Cliente       Cliente        @relation(fields: [cliente_id], references: [cliente_id])
+    DetallesOrden DetalleOrden[] // Relación M-N implícita
+}
+
+model Direccion {
+    id_direccion     Int     @id @default(autoincrement())
+    departamento     String  @db.VarChar(50)
+    municipio        String  @db.VarChar(50)
+    distrito         String? @db.VarChar(50)
+    calle            String  @db.VarChar(100)
+    colonia          String? @db.VarChar(100)
+    casa             String? @db.VarChar(20)
+    punto_referencia String? @db.VarChar(200)
+
+    Clientes    Cliente[]   @relation("ClienteDireccion")
+    Empleados   Empleado[]  @relation("EmpleadoDireccion")
+    Proveedores Proveedor[] @relation("ProveedorDireccion")
+    Envio       Envio?
+}
+
+model Envio {
+    id_envio       Int         @id @default(autoincrement())
+    fecha_creacion DateTime    @default(now())
+    estado         EstadoEnvio
+
+    direccion_id Int       @unique
+    Direccion    Direccion @relation(fields: [direccion_id], references: [id_direccion])
+
+    orden_compra_id Int?
+    OrdenCompra     OrdenCompra? @relation(fields: [orden_compra_id], references: [orden_compra_id])
+}
+
+// --- Modelo para Almacenar Tokens JWT ---
+
+model AuthToken {
+    id         Int       @id @default(autoincrement())
+    token      String    @unique @db.VarChar(255)
+    createdAt  DateTime  @default(now())
+    expiresAt  DateTime?
+    clienteId  Int?
+    cliente    Cliente?  @relation("ClienteTokens", fields: [clienteId], references: [cliente_id])
+    empleado   Empleado? @relation("EmpleadoTokens", fields: [empleadoId], references: [empleado_id])
+    empleadoId Int?
+
+    @@index([clienteId])
+    @@index([empleadoId])
+}
