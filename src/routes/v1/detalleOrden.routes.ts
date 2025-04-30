@@ -1,7 +1,7 @@
 // routes/detalleOrden.routes.ts
 
 import { Router } from 'express';
-import detalleOrdenController from '../controllers/detalleOrden.controller';
+import detalleOrdenController from '../../controllers/detalleOrden.controller';
 
 const router = Router();
 

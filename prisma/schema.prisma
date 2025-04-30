@@ -80,20 +80,21 @@ model Cliente {
 }
 
 model Empleado {
-  empleado_id        Int           @id @default(autoincrement())
-  nombre             String        @db.VarChar(50)
-  apellido           String        @db.VarChar(50)
-  telefono           String        @db.VarChar(20)
-  email              String        @unique @db.VarChar(100)
-  fecha_contratacion DateTime      @default(now())
+  empleado_id        Int            @id @default(autoincrement())
+  nombre             String         @db.VarChar(50)
+  apellido           String         @db.VarChar(50)
+  email              String         @unique @db.VarChar(100)
+  password           String         @db.VarChar(255)    // ← este es el nuevo
+  fecha_contratacion DateTime       @default(now())
   estado             EstadoEmpleado
-  isAdmin            Boolean       @default(false)
+  isAdmin            Boolean        @default(false)
 
   direccion_id Int?
-  Direccion    Direccion?         @relation("EmpleadoDireccion", fields: [direccion_id], references: [id_direccion])
+  Direccion    Direccion? @relation("EmpleadoDireccion", fields: [direccion_id], references: [id_direccion])
 
-  AuthTokens AuthToken[]          @relation("EmpleadoTokens")
+  AuthTokens AuthToken[] @relation("EmpleadoTokens")
 }
+
 
 model Material {
   material_id         Int          @id @default(autoincrement())
