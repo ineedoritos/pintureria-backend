@@ -7,21 +7,21 @@ export const getAllClientes = async () => {
   return await prisma.cliente.findMany();
 };
 
-export const getClienteById = async (id: number) => {
-  return await prisma.cliente.findUnique({ where: { id } });
+export const getClienteById = async (cliente_id: number) => {
+  return await prisma.cliente.findUnique({ where: { cliente_id } });
 };
 
 export const createCliente = async (data: any) => {
   return await prisma.cliente.create({ data });
 };
 
-export const updateCliente = async (id: number, data: any) => {
+export const updateCliente = async (cliente_id: number, data: any) => {
   return await prisma.cliente.update({
-    where: { id },
+    where: { cliente_id },
     data,
   });
 };
 
-export const deleteCliente = async (id: number) => {
-  return await prisma.cliente.delete({ where: { id } });
+export const deleteCliente = async (cliente_id: number) => {
+  return await prisma.cliente.delete({ where: { cliente_id } });
 };
