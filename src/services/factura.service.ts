@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export const getAllFacturas = async () => {
   return await prisma.facturaPago.findMany({
-    include: { DetallesOrden: true }, // ojo: DetallesOrden
+    include: { DetallesOrden: true }, 
   });
 };
 

@@ -84,7 +84,7 @@ model Empleado {
   nombre             String         @db.VarChar(50)
   apellido           String         @db.VarChar(50)
   email              String         @unique @db.VarChar(100)
-  password           String         @db.VarChar(255)    // ← este es el nuevo
+  password           String         @db.VarChar(255)   
   fecha_contratacion DateTime       @default(now())
   estado             EstadoEmpleado
   isAdmin            Boolean        @default(false)
