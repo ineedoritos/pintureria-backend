@@ -1,6 +1,7 @@
 // src/index.ts
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 
 import authRoutes from './routes/v1/auth.routes';
 import clienteRoutes from './routes/v1/cliente.routes';
@@ -16,11 +17,15 @@ import { requireAuth } from './middlewares/auth.middleware';
 
 const app = express();
 app.use(express.json());
+app.use(cors({ origin: 'http://localhost:5173' }));         
+app.use(express.json());
+
 
 // --- RUTAS PÚBLICAS ---
 app.use('/api/auth', authRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use('/api/empleados', empleadoRoutes);
+
 
 app.use('/api/proveedores', proveedorRoutes);
 app.use('/api/ordenes-compra', ordenCompraRoutes);
@@ -38,8 +43,8 @@ app.listen(PORT, () => {
 
 
 
-import cors from 'cors';
 
-const appp= express();
-appp.use(cors());          
-appp.use(express.json());
+
+
+
+

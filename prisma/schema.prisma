@@ -74,7 +74,7 @@ model Cliente {
   stripeCustomerId String?       @db.VarChar(255)
   AuthToken        AuthToken[]   @relation("ClienteTokens")
   FacturaPago      FacturaPago[]
-
+  password         String        @db.VarChar(255)
   direccion_id Int?
   Direccion    Direccion?       @relation("ClienteDireccion", fields: [direccion_id], references: [id_direccion])
 }
@@ -84,7 +84,7 @@ model Empleado {
   nombre             String         @db.VarChar(50)
   apellido           String         @db.VarChar(50)
   email              String         @unique @db.VarChar(100)
-  password           String         @db.VarChar(255)   
+  password           String         @db.VarChar(255)
   fecha_contratacion DateTime       @default(now())
   estado             EstadoEmpleado
   isAdmin            Boolean        @default(false)

@@ -35,7 +35,7 @@ export const authService = {
         empleado_id: true,
         email:       true,
         password:    true,
-        isAdmin:     true
+        isAdmin:     false
       }
     });
     if (!user) {
