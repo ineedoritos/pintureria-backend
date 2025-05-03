@@ -36,10 +36,33 @@ app.use('/api/materiales', requireAuth, materialRoutes);
 app.use('/api/detalles-orden', requireAuth, detalleOrden);
 app.use('/api/direcciones', requireAuth, direccionRoutes);
 
+// Manejo de excepciones no atrapadas
+process.on('uncaughtException', (err) => {
+  console.error('Excepción no atrapada:', err);
+  // Enviar una respuesta al frontend con error genérico
+  app.use((req, res) => {
+    res.status(500).json({ error: 'Error interno del servidor. Intenta más tarde.' });
+  });
+  // No cerrar el servidor automáticamente, dejar que continúe
+  // process.exit(1); // Evita que el servidor se cierre inmediatamente
+});
+
+// Manejo de promesas no manejadas
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Rechazo no manejado:', reason);
+  // Enviar una respuesta al frontend con error genérico
+  app.use((req, res) => {
+    res.status(500).json({ error: 'Error interno del servidor. Intenta más tarde.' });
+  });
+  // No cerrar el servidor automáticamente, dejar que continúe
+  // process.exit(1); // Evita que el servidor se cierre inmediatamente
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
 
 
 
