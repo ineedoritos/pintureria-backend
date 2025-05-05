@@ -1,10 +1,10 @@
 // src/controllers/cliente.controller.ts
 import { Request, Response } from 'express';
-import * as ClienteService from '../services/cliente.service';
+import { clienteService } from '../services/cliente.service';
 
 export const getClientes = async (req: Request, res: Response) => {
   try {
-    const clientes = await ClienteService.getAllClientes();
+    const clientes = await clienteService.getAllClientes();
     res.json(clientes);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener clientes' });
@@ -14,7 +14,7 @@ export const getClientes = async (req: Request, res: Response) => {
 export const getCliente = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const cliente = await ClienteService.getClienteById(Number(id));
+    const cliente = await clienteService.getClienteById(Number(id));
     if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado' });
     res.json(cliente);
   } catch (error) {
@@ -24,7 +24,7 @@ export const getCliente = async (req: Request, res: Response) => {
 
 export const createCliente = async (req: Request, res: Response) => {
   try {
-    const cliente = await ClienteService.createCliente(req.body);
+    const cliente = await clienteService.createCliente(req.body);
     res.status(201).json(cliente);
   } catch (error) {
     res.status(500).json({ error: 'Error al crear cliente' });
@@ -35,7 +35,7 @@ export const createCliente = async (req: Request, res: Response) => {
 export const updateCliente = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const cliente = await ClienteService.updateCliente(Number(id), req.body);
+    const cliente = await clienteService.updateCliente(Number(id), req.body);
     res.json(cliente);
   } catch (error) {
     res.status(500).json({ error: 'Error al actualizar cliente' });
@@ -45,7 +45,7 @@ export const updateCliente = async (req: Request, res: Response) => {
 export const deleteCliente = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await ClienteService.deleteCliente(Number(id));
+    await clienteService.deleteCliente(Number(id));
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: 'Error al eliminar cliente' });

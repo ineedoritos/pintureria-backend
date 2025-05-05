@@ -1,4 +1,6 @@
 import { PrismaClient, EstadoEmpleado } from "@prisma/client";
+import bcrypt from "bcrypt";
+
 const prisma = new PrismaClient();
 
 export const empleadoService = {
@@ -14,6 +16,14 @@ export const empleadoService = {
       include: { Direccion: true }
     });
   },
+
+  getByEmail: async (email: string) => {
+    return await prisma.empleado.findUnique({
+      where: { email },
+      
+    });
+  },
+
 
   create: async (data: any) => {
     return await prisma.empleado.create({
@@ -36,5 +46,25 @@ export const empleadoService = {
     return await prisma.empleado.delete({
       where: { empleado_id: id }
     });
+  },
+
+  register: async (data: {
+    email: string;
+    password: string;
+    nombre: string;
+    apellido: string;
+  }) => {
+    const hash = await bcrypt.hash(data.password, 10);
+    return prisma.empleado.create({
+      data: {
+        email: data.email,
+        password: hash,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        estado: EstadoEmpleado.ACTIVO,
+        fecha_contratacion: new Date()
+      },
+    });
   }
 };
+ 
