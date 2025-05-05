@@ -33,8 +33,8 @@ export const authService = {
         console.log(password, user.password);
         console.log(match)
         return { success: false, message: "Contraseña incorrecta" };
-        
-      } 
+
+      }
 
       // Determinar el rol y obtener el id correspondiente
       const userId = 'cliente_id' in user ? user.cliente_id : user.empleado_id;
@@ -52,9 +52,10 @@ export const authService = {
           ['cliente_id' in user ? 'clienteId' : 'empleadoId']: userId,
         },
       });
-      console.log(token) 
-      return { success: true, token };
-       // Retornar el token junto con un mensaje de éxito
+      console.log(token)
+      // Después:
+      return { success: true, token, role };
+      // Retornar el token junto con un mensaje de éxito
     } catch (error) {
       // Manejo de errores, sin lanzar excepciones
       console.error("Error durante el login:", error);

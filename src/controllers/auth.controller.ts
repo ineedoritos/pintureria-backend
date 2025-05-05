@@ -1,17 +1,19 @@
-import { Request, Response } from 'express'; 
-import { authService } from '../services/auth.service'; 
+import { Request, Response } from 'express';
+import { authService } from '../services/auth.service';
 
 export const authController = {
-  
+
   login: async (req: Request, res: Response) => {
-    const { email, password } = req.body;  
+    const { email, password } = req.body;
 
     try {
-      const result = await authService.login(email, password); 
+      const result = await authService.login(email, password);
 
+      // Después:
       if (result.success) {
-        
-        return res.status(200).json({ token: result.token });
+        return res
+          .status(200)
+          .json({ token: result.token, role: result.role });
       }
 
 
@@ -25,15 +27,15 @@ export const authController = {
 
 
   verifyToken: (req: Request, res: Response) => {
-    const token = req.headers['authorization']?.split(' ')[1];  
-    
+    const token = req.headers['authorization']?.split(' ')[1];
+
     if (!token) {
       return res.status(401).json({ message: 'Token no proporcionado' });
     }
 
     try {
       const decoded = authService.verifyToken(token);  // Verificamos el token usando el servicio
-      return res.status(200).json({ decoded });  
+      return res.status(200).json({ decoded });
     } catch (error) {
       return res.status(401).json({ message: 'Token inválido' });
     }
