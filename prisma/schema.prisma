@@ -60,23 +60,30 @@ enum TipoDocumentoCliente {
   OTRO
 }
 
+/// Nuevo enum para distinguir Producto o Pintura
+enum CategoriaItem {
+  PRODUCTO
+  PINTURA
+}
+
 // --- Modelos de Negocio ---
 
 model Cliente {
-  cliente_id       Int           @id @default(autoincrement())
-  nombre           String        @db.VarChar(50)
-  apellido         String        @db.VarChar(50)
-  telefono         String        @db.VarChar(20)
-  email            String        @unique @db.VarChar(100)
+  cliente_id       Int                  @id @default(autoincrement())
+  nombre           String               @db.VarChar(50)
+  apellido         String               @db.VarChar(50)
+  telefono         String               @db.VarChar(20)
+  email            String               @unique @db.VarChar(100)
   tipo_documento   TipoDocumentoCliente
-  numero_documento String        @unique @db.VarChar(20)
-  fecha_registro   DateTime      @default(now())
-  stripeCustomerId String?       @db.VarChar(255)
-  AuthToken        AuthToken[]   @relation("ClienteTokens") 	
+  numero_documento String               @unique @db.VarChar(20)
+  fecha_registro   DateTime             @default(now())
+  stripeCustomerId String?              @db.VarChar(255)
+  AuthToken        AuthToken[]          @relation("ClienteTokens")
   FacturaPago      FacturaPago[]
-  password         String        @db.VarChar(255)
+  password         String               @db.VarChar(255) // campo para autenticación
+
   direccion_id Int?
-  Direccion    Direccion?       @relation("ClienteDireccion", fields: [direccion_id], references: [id_direccion])
+  Direccion    Direccion?             @relation("ClienteDireccion", fields: [direccion_id], references: [id_direccion])
 }
 
 model Empleado {
@@ -90,38 +97,38 @@ model Empleado {
   isAdmin            Boolean        @default(false)
 
   direccion_id Int?
-  Direccion    Direccion? @relation("EmpleadoDireccion", fields: [direccion_id], references: [id_direccion])
+  Direccion    Direccion?          @relation("EmpleadoDireccion", fields: [direccion_id], references: [id_direccion])
 
-  AuthTokens AuthToken[] @relation("EmpleadoTokens")
+  AuthTokens AuthToken[]           @relation("EmpleadoTokens")
 }
 
-
 model Material {
-  material_id         Int          @id @default(autoincrement())
-  nombre              String       @db.VarChar(50)
-  descripcion         String       @db.Text
-  tipo                String       @db.VarChar(30)
-  unidad_medida       String       @db.VarChar(10)
-  stock_actual        Decimal      @db.Decimal(10, 2)
-  stock_minimo        Decimal      @db.Decimal(10, 2)
+  material_id            Int             @id @default(autoincrement())
+  nombre                 String          @db.VarChar(50)
+  descripcion            String          @db.Text
+  unidad_medida          String          @db.VarChar(10)
+  stock_actual           Decimal         @db.Decimal(10, 2)
+  stock_minimo           Decimal         @db.Decimal(10, 2)
+  categoria              CategoriaItem   @map("tipo") @default(PRODUCTO) 
+  imageUrl               String?         @db.VarChar(255)
 
   proveedor_principal_id Int?
-  ProveedorPrincipal     Proveedor? @relation("ProveedorPrincipal", fields: [proveedor_principal_id], references: [proveedor_id])
+  ProveedorPrincipal     Proveedor?      @relation("ProveedorPrincipal", fields: [proveedor_principal_id], references: [proveedor_id])
 
   DetalleOrden DetalleOrden[]
 }
 
 model Proveedor {
-  proveedor_id          Int         @id @default(autoincrement())
-  nombre                String      @db.VarChar(50)
-  telefono              String      @db.VarChar(20)
-  email                 String      @unique @db.VarChar(100)
-  productos_principales String?     @db.Text
+  proveedor_id          Int           @id @default(autoincrement())
+  nombre                String        @db.VarChar(50)
+  telefono              String        @db.VarChar(20)
+  email                 String        @unique @db.VarChar(100)
+  productos_principales String?       @db.Text
 
-  direccion_id Int?       @unique
-  Direccion    Direccion? @relation("ProveedorDireccion", fields: [direccion_id], references: [id_direccion])
+  direccion_id Int?                     @unique
+  Direccion    Direccion?               @relation("ProveedorDireccion", fields: [direccion_id], references: [id_direccion])
 
-  MaterialesPrincipales Material[]   @relation("ProveedorPrincipal")
+  MaterialesPrincipales Material[]      @relation("ProveedorPrincipal")
   OrdenesCompra         OrdenCompra[]
 }
 
@@ -141,8 +148,8 @@ model DetalleOrden {
   detalle_id      Int       @id @default(autoincrement())
   orden_compra_id Int
   material_id     Int
-  cantidad        Decimal    @db.Decimal(10, 2)
-  precio_unitario Decimal    @db.Decimal(10, 2)
+  cantidad        Decimal   @db.Decimal(10, 2)
+  precio_unitario Decimal   @db.Decimal(10, 2)
 
   OrdenCompra OrdenCompra @relation(fields: [orden_compra_id], references: [orden_compra_id])
   Material    Material    @relation(fields: [material_id], references: [material_id])

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `material` ADD COLUMN `categoria` ENUM('PRODUCTO', 'PINTURA') NOT NULL DEFAULT 'PRODUCTO',
+    ADD COLUMN `imageUrl` VARCHAR(255) NULL;

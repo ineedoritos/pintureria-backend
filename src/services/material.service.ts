@@ -1,26 +1,39 @@
+// src/services/material.service.ts
 import { PrismaClient } from '@prisma/client';
-
 const prisma = new PrismaClient();
 
-export const getAllMaterials = async () => {
-  return await prisma.material.findMany();
-};
+export const materialService = {
+  getAll: () => prisma.material.findMany(),
 
-export const getMaterialById = async (material_id: number) => {
-  return await prisma.material.findUnique({ where: { material_id } });
-};
+  getById: (id: number) =>
+    prisma.material.findUnique({ where: { material_id: id } }),
 
-export const createMaterial = async (data: any) => {
-  return await prisma.material.create({ data });
-};
+  create: (data: {
+    nombre: string;
+    descripcion: string;
+    unidad_medida: string;
+    stock_actual: number;
+    stock_minimo: number;
+    categoria: string; // Cambiado de CategoriaItem a string o el tipo correcto
+    tipo: string; // Campo requerido añadido
+    imageUrl?: string;
+  }) => prisma.material.create({ data }),
 
-export const updateMaterial = async (material_id: number, data: any) => {
-  return await prisma.material.update({
-    where: { material_id },
-    data,
-  });
-};
+  update: (id: number, data: Partial<{
+    nombre: string;
+    descripcion: string;
+    unidad_medida: string;
+    stock_actual: number;
+    stock_minimo: number;
+    categoria: string; // Cambiado de CategoriaItem a string o el tipo correcto
+    tipo?: string; // Campo opcional en actualización
+    imageUrl?: string;
+  }>) =>
+    prisma.material.update({
+      where: { material_id: id },
+      data,
+    }),
 
-export const deleteMaterial = async (material_id: number) => {
-  return await prisma.material.delete({ where: { material_id } });
+  delete: (id: number) =>
+    prisma.material.delete({ where: { material_id: id } }),
 };

@@ -1,52 +1,86 @@
 // src/controllers/material.controller.ts
 import { Request, Response } from 'express';
-import * as MaterialService from '../services/material.service';
+import { materialService } from '../services/material.service';
 
-export const getMaterials = async (req: Request, res: Response) => {
-  try {
-    const materials = await MaterialService.getAllMaterials();
-    res.json(materials);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener materiales' });
-  }
-};
+export const materialController = {
+  getAll: async (_req: Request, res: Response) => {
+    try {
+      const materials = await materialService.getAll();
+      res.json(materials);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  },
 
-export const getMaterial = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const material = await MaterialService.getMaterialById(Number(id));
-    if (!material) return res.status(404).json({ error: 'Material no encontrado' });
-    res.json(material);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener material' });
-  }
-};
+  getById: async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      const material = await materialService.getById(id);
+      if (material) {
+        res.json(material);
+      } else {
+        res.status(404).json({ error: 'Material not found' });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  },
 
-export const createMaterial = async (req: Request, res: Response) => {
-  try {
-    const material = await MaterialService.createMaterial(req.body);
-    res.status(201).json(material);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al crear material' });
-  }
-};
+  create: async (req: Request, res: Response) => {
+    try {
+      const { 
+        nombre, 
+        descripcion, 
+        unidad_medida, 
+        stock_actual, 
+        stock_minimo, 
+        categoria,
+        tipo // Añadido el campo tipo
+      } = req.body;
+      
+      const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
 
-export const updateMaterial = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const material = await MaterialService.updateMaterial(Number(id), req.body);
-    res.json(material);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar material' });
-  }
-};
+      const mat = await materialService.create({
+        nombre,
+        descripcion,
+        unidad_medida,
+        stock_actual: Number(stock_actual),
+        stock_minimo: Number(stock_minimo),
+        categoria,
+        tipo, // Añadido el campo requerido
+        imageUrl,
+      });
 
-export const deleteMaterial = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    await MaterialService.deleteMaterial(Number(id));
-    res.status(204).send();
-  } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar material' });
-  }
+      res.status(201).json(mat);
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  },
+
+  update: async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      const { categoria, tipo, ...rest } = req.body;
+      const updateData: any = { ...rest };
+      
+      if (categoria) updateData.categoria = categoria;
+      if (tipo) updateData.tipo = tipo;
+      if (req.file) updateData.imageUrl = `/uploads/${req.file.filename}`;
+
+      const mat = await materialService.update(id, updateData);
+      res.json(mat);
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  },
+
+  delete: async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      await materialService.delete(id);
+      res.status(204).send();
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  },
 };
