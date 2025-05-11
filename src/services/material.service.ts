@@ -1,6 +1,7 @@
 // src/services/material.service.ts
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { CategoriaItem } from "@prisma/client";
+import prisma from "../prisma";
+
 
 export const materialService = {
   getAll: () => prisma.material.findMany(),
@@ -14,7 +15,7 @@ export const materialService = {
     unidad_medida: string;
     stock_actual: number;
     stock_minimo: number;
-    categoria: string; // Cambiado de CategoriaItem a string o el tipo correcto
+    categoria: CategoriaItem | undefined; // Cambiado de CategoriaItem a string o el tipo correcto
     tipo: string; // Campo requerido añadido
     imageUrl?: string;
   }) => prisma.material.create({ data }),
@@ -25,7 +26,7 @@ export const materialService = {
     unidad_medida: string;
     stock_actual: number;
     stock_minimo: number;
-    categoria: string; // Cambiado de CategoriaItem a string o el tipo correcto
+    categoria: CategoriaItem; // Cambiado de CategoriaItem a string o el tipo correcto
     tipo?: string; // Campo opcional en actualización
     imageUrl?: string;
   }>) =>

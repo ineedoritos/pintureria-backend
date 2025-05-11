@@ -1,6 +1,6 @@
 // src/services/ordenCompra.service.ts
-import { PrismaClient, EstadoOrdenCompra } from '@prisma/client';
-const prisma = new PrismaClient();
+import { EstadoOrdenCompra } from '@prisma/client';
+import prisma from '../prisma';
 
 export const ordenCompraService = {
   getAll: async () => {

@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../prisma';
 import bcrypt from 'bcrypt';
 
  // Puedes ajustar el número de saltos (rounds) según tus necesidades
 
  const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || '10'); 
 
-const prisma = new PrismaClient();
+
 
 export const clienteService = {
 

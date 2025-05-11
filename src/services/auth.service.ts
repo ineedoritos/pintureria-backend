@@ -2,11 +2,10 @@ import { clienteService } from './cliente.service';  // Importamos clienteServic
 import { empleadoService } from './empleado.service';  // Importamos empleadoService
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { Empleado, PrismaClient } from '@prisma/client';
-import { Cliente } from '@prisma/client';
+import { Empleado, Cliente} from '@prisma/client';
 import { ROLES } from '../utils/constants';
+import prisma from '../prisma';
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export const authService = {

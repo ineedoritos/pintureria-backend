@@ -1,6 +1,6 @@
 // src/services/envio.service.ts
-import { PrismaClient, EstadoEnvio } from '@prisma/client';
-const prisma = new PrismaClient();
+import { EstadoEnvio } from '@prisma/client';
+import prisma from '../prisma';
 
 export const envioService = {
   getAll: async () => {

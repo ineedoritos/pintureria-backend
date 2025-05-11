@@ -1,7 +1,7 @@
 // src/services/factura.service.ts
-import { PrismaClient } from '@prisma/client';
+import prisma	 from "../prisma";
 
-const prisma = new PrismaClient();
+
 
 export const getAllFacturas = async () => {
   return await prisma.facturaPago.findMany({

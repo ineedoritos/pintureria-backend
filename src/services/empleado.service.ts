@@ -1,7 +1,8 @@
-import { PrismaClient, EstadoEmpleado } from "@prisma/client";
+import { EstadoEmpleado } from "@prisma/client";
 import bcrypt from "bcrypt";
+import prisma from "../prisma";
 
-const prisma = new PrismaClient();
+
 
 export const empleadoService = {
   getAll: async () => {

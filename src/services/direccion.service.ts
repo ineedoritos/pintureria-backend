@@ -1,6 +1,6 @@
 // src/services/direccion.service.ts
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from "../prisma";
+
 
 export const direccionService = {
   getAll: async () => {
