@@ -214,3 +214,11 @@ model AuthToken {
   @@index([clienteId])
   @@index([empleadoId])
 }
+
+model Bitacora {
+  idReg            Int      @id @default(autoincrement())
+  usuarioSistema   String
+  fechaHoraSistema DateTime @default(now())
+  nombreTabla      String
+  transaccion      String
+}

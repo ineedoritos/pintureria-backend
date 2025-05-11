@@ -15,6 +15,7 @@ import ordenCompraRoutes from './routes/v1/ordenCompra.routes';
 import envioRoutes from './routes/v1/envio.routes';
 
 import { requireAuth } from './middlewares/auth.middleware';
+import { createallBitacoraTriggers } from './database-scripts/createTriggers';
 
  // Carga las variables del .env
 
@@ -43,12 +44,11 @@ app.use('/api/direcciones', requireAuth, direccionRoutes);
 // Manejo de excepciones no atrapadas
 process.on('uncaughtException', (err) => {
   console.error('Excepción no atrapada:', err);
-  // Enviar una respuesta al frontend con error genérico
+
   app.use((req, res) => {
     res.status(500).json({ error: 'Error interno del servidor. Intenta más tarde.' });
   });
-  // No cerrar el servidor automáticamente, dejar que continúe
-  // process.exit(1); // Evita que el servidor se cierre inmediatamente
+
 });
 
 // Manejo de promesas no manejadas
@@ -58,8 +58,7 @@ process.on('unhandledRejection', (reason, promise) => {
   app.use((req, res) => {
     res.status(500).json({ error: 'Error interno del servidor. Intenta más tarde.' });
   });
-  // No cerrar el servidor automáticamente, dejar que continúe
-  // process.exit(1); // Evita que el servidor se cierre inmediatamente
+
 });
 
  
@@ -68,16 +67,30 @@ app.use((err:any, req: any, res:any, next:any) => {
   res.status(500).json({ error: 'Error interno del servidor. Intenta más tarde.' });
 });
 
-dotenv.config();  // Carga las variables del .env
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
 
+  
+
+dotenv.config();  
 
 
 
+const startServer = async () => {
+  try {
+    await createallBitacoraTriggers();  // Esperamos que se creen los triggers antes de iniciar el servidor
+    console.log('Triggers creados correctamente.');
+    
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Error al crear triggers:', error);
+  }
+};
+
+// Llamar a la función para iniciar el servidor
+startServer();
 
 
 
