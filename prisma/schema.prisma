@@ -222,3 +222,11 @@ model Bitacora {
   nombreTabla      String
   transaccion      String
 }
+
+model ControlEjecucion {
+  id               Int      @id @default(autoincrement())
+  nombre_script    String   @unique
+  ejecutado        Boolean  @default(false)
+  fecha_ejecucion  DateTime @default(now()) // Equivalente a CURRENT_TIMESTAMP
+}
+

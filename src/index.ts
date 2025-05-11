@@ -15,7 +15,7 @@ import ordenCompraRoutes from './routes/v1/ordenCompra.routes';
 import envioRoutes from './routes/v1/envio.routes';
 
 import { requireAuth } from './middlewares/auth.middleware';
-import { createallBitacoraTriggers } from './database-scripts/createTriggers';
+import { createAllBitacoraTriggers } from './database-scripts/initTriggers';
 
  // Carga las variables del .env
 
@@ -77,7 +77,7 @@ dotenv.config();
 
 const startServer = async () => {
   try {
-    await createallBitacoraTriggers();  // Esperamos que se creen los triggers antes de iniciar el servidor
+    await createAllBitacoraTriggers();  // Esperamos que se creen los triggers antes de iniciar el servidor
     console.log('Triggers creados correctamente.');
     
     const PORT = process.env.PORT || 3000;

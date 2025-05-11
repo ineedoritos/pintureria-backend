@@ -1,66 +1,59 @@
-import prisma from "../prisma";
+import mysql from 'mysql2/promise';
 
-let awa =false
-
-export const createallBitacoraTriggers = async () => {
-    let contador = 0;
-    let dml = "";
-
-    type Tabla = { table_name: string }[];
-
-    // Obtener todas las tablas de la base de datos
-    const tablas: Tabla = await prisma.$queryRaw`SHOW TABLES`;
-
-    // Crear una lista de promesas para las operaciones
-    const promises = [];
-
-    // Limitar el contador a 3 iteraciones (para INSERT, UPDATE y DELETE)
-    while (contador <= 2) {
-        // Asignar el valor de la operación según el contador
-        contador === 0 ? dml = "INSERT" : (contador === 1 ? dml = "UPDATE" : dml = "DELETE");
-
-        for (let tabla of tablas) {
-            const tableName = Object.values(tabla)[0];
-
-            // Instrucción para eliminar el trigger si ya existe
-            const dropTriggerSQL = `
-            DROP TRIGGER IF EXISTS trigger_${tableName}_after_${dml};
-            `;
-
-            // Instrucción para crear el trigger
-            const triggerSQL = `
-            CREATE TRIGGER trigger_${tableName}_after_${dml}
-            AFTER ${dml} ON ${tableName}
-            FOR EACH ROW
-            BEGIN
-              INSERT INTO Bitacora (usuarioSistema, fechaHoraSistema, nombreTabla, transaccion)
-              VALUES ('system', NOW(), '${tableName}', '${dml}');
-            END;
-            `;
-
-            // Guardamos las promesas de la eliminación y creación del trigger
-            promises.push(prisma.$executeRawUnsafe(dropTriggerSQL)
-                .then(() => prisma.$executeRawUnsafe(triggerSQL))
-                .then(() => {
-                    console.log(`Trigger creado para la tabla: ${tableName}`);
-                })
-                .catch((error) => {
-                    console.error(`Error al crear trigger para la tabla ${tableName}:`, error);
-                })
-            );
-        }
-
-        contador++;
-    }
-
-    // Esperamos a que todas las promesas se resuelvan
-    await Promise.all(promises);
-
-    console.log('Todos los triggers fueron creados.');
-
-    
-
-
+const config = {
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'pintureria'
 };
 
+export async function createTriggers() {
+  const connection = await mysql.createConnection(config);
 
+  try {
+    // Paso 1: Obtener nombres de tablas correctamente
+    const [tables] = await connection.query(`
+      SELECT TABLE_NAME 
+      FROM information_schema.tables 
+      WHERE table_schema = ? 
+        AND TABLE_NAME != 'Bitacora'  -- <-- MAYÚSCULAS
+    `, [config.database]);
+
+    // Paso 2: Iterar y validar
+    for (const table of tables as any[]) {
+      const tableName = table.TABLE_NAME; // <-- MAYÚSCULAS
+
+      // Validar nombre
+      if (!tableName || tableName === 'undefined') {
+        console.error('❌ Nombre de tabla inválido:', table);
+        continue;
+      }
+
+      // Paso 3: Crear triggers
+      const operations = ['INSERT', 'UPDATE', 'DELETE'];
+      for (const operation of operations) {
+        const triggerName = `trigger_${tableName}_after_${operation}`;
+        const sql = `
+          CREATE TRIGGER IF NOT EXISTS \`${triggerName}\`
+          AFTER ${operation} ON \`${tableName}\`
+          FOR EACH ROW
+          BEGIN
+            INSERT INTO Bitacora (usuarioSistema, fechaHoraSistema, nombreTabla, transaccion)
+            VALUES (USER(), NOW(), '${tableName}', '${operation}');
+          END;
+        `;
+
+        await connection.query(sql);
+        console.log(`✅ Trigger creado: ${triggerName}`);
+      }
+    }
+
+    console.log('🎉 ¡Todos los triggers se actualizaron!');
+
+  } catch (error) {
+    console.error('❌ Error:', error);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+}
